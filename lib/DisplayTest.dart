@@ -1,4 +1,3 @@
-
 //import 'dart:html';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -31,37 +30,43 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   Future<List<User>> _getUsers() async {
-
-
-    var data = await http.get("http://10.0.2.2:3000/expenses.ts");//default Android. should null after testing
+    // var data = await http.get("http://10.0.2.2:3000/expenses");//default Android. should null after testing
+    var data;
     //perform check
-//    if (Platform.isAndroid)
-//      {
-//        data = await http.get("http://10.0.2.2:3000/expenses");
-//      }
-//    else // for iOS simulator
-//      {
-//      data = await http.get("http://localhost:3000/expenses");
-//    }
-
-    var jsonData = json.decode(data.body);
-
-    List<User> users = [];
-
-    for(var u in jsonData){
-
-      User user = User(u["id"], u["value"], u["currency"], u["date"], u["merchant"], u["receipts"], u["comment"], u["category"], u["first"], u["last"], u["email"]);
-
-      users.add(user);
-
+    if (Platform.isAndroid) {
+      data = await http.get("http://10.0.2.2:3000/expenses");
+    } else // for iOS simulator
+    {
+      data = await http.get("http://localhost:3000/expenses");
     }
 
-    print(users.length);
+    var jsonData = json.decode(data.body);
+//print("jsonData: "+jsonData.toString());
+    List<User> users = [];
+    debugPrint("out for loop1");
+    for (var u in jsonData) {
+      debugPrint("in for loop");
+      User user = User(
+          u["id"],
+          u["value"],
+          u["currency"],
+          u["date"],
+          u["merchant"],
+          u["receipts"],
+          u["comment"],
+          u["category"],
+          u["first"],
+          u["last"],
+          u["email"]);
+
+      users.add(user);
+      debugPrint("user: " + user.toString());
+    }
+    debugPrint("out for loop2");
+    print("user.length: " + users.length.toString());
 
     return users;
-
   }
 
   @override
@@ -73,32 +78,32 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Container(
         child: FutureBuilder(
           future: _getUsers(),
-          builder: (BuildContext context, AsyncSnapshot snapshot){
-            print(snapshot.data);
-            if(snapshot.data == null){
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            print("snapshot.data: " + snapshot.data.toString()); //check
+//            if(!snapshot.hasData){
+            if (snapshot.data == null) {
               return Container(
                   child: Center(
-                      child: Text("Loading...")
-                  )
-              );
+                child: CircularProgressIndicator(),
+              ));
             } else {
               return ListView.builder(
                 itemCount: snapshot.data.length,
                 itemBuilder: (BuildContext context, int index) {
                   return ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: NetworkImage(
-                          snapshot.data[index].picture
-                      ),
-                    ),
+//                    leading: CircleAvatar(
+//                      backgroundImage: NetworkImage(
+//                          snapshot.data[index].picture
+//                      ),
+//                    ),
                     title: Text(snapshot.data[index].first),
                     subtitle: Text(snapshot.data[index].date),
-                    onTap: (){
-
-                      Navigator.push(context,
-                          new MaterialPageRoute(builder: (context) => DetailPage(snapshot.data[index]))
-                      );
-
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          new MaterialPageRoute(
+                              builder: (context) =>
+                                  DetailPage(snapshot.data[index])));
                     },
                   );
                 },
@@ -112,7 +117,6 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class DetailPage extends StatelessWidget {
-
   final User user;
 
   DetailPage(this.user);
@@ -121,30 +125,38 @@ class DetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(user.first),
-        )
-    );
+      title: Text(user.first),
+    ));
   }
 }
 
-
 class User {
-   final String id;
-   //final String amount;
-   final String value;
-   final String currency;
-   final String date;
-   final String receipts;
-   final String merchant;
-   final String comment;
-   final String category;
-   //final String user;
-   final String first;
-   final String last;
-   final String email;
+  final String id;
+  //final String amount;
+  final String value;
+  final String currency;
+  final String date;
+  final String receipts;
+  final String merchant;
+  final String comment;
+  final String category;
+  //final String user;
+  final String first;
+  final String last;
+  final String email;
 
-  User(this.id, this.value, this.currency, this.date,this.receipts, this.merchant, this.comment, this.category, this.first, this.last, this.email);
-
+  User(
+      this.id,
+      this.value,
+      this.currency,
+      this.date,
+      this.receipts,
+      this.merchant,
+      this.comment,
+      this.category,
+      this.first,
+      this.last,
+      this.email);
 }
 //
 //import 'dart:async';

@@ -40,13 +40,23 @@ class _MyHomePageState extends State<MyHomePage> {
     {
       data = await http.get("http://localhost:3000/expenses");
     }
-
+//testing start
+    final result = json.decode(data.body);
+    Iterable list = result['expenses'];
+     //debugPrint("list: "+list.toString());
+    //Map<String, dynamic> test = jsonDecode(data.body);
+//    String testSt = test['expenses'].toString();
+//    debugPrint('Howdy1, $testSt!');
+    //Map<String, dynamic> test2 = test['expenses'];
+    //String testSt2=test2['id'].toString();
+    //debugPrint('Howdy2, $testSt2!');
+    //testing end
     var jsonData = json.decode(data.body);
-//print("jsonData: "+jsonData.toString());
+//debugPrint("jsonData: "+jsonData.toString());//all?
     List<User> users = [];
     debugPrint("out for loop1");
-    for (var u in jsonData) {
-      debugPrint("in for loop");
+    for (var u in list) {
+      debugPrint("in for loop "+u.toString());//{id: 5b996064dfd5b783915112f5, amount: {value: 1854.99, currency: EUR}, date: 2018-09-10T02:11:29.184Z, merchant: KAGE, receipts: [], comment: , category: , user: {first: Vickie, last: Lee, email: vickie.lee@pleo.io}, index: 0}
       User user = User(
           u["id"],
           u["value"],
@@ -61,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
           u["email"]);
 
       users.add(user);
-      debugPrint("user: " + user.toString());
+      debugPrint("user: " + user.id.toString());
     }
     debugPrint("out for loop2");
     print("user.length: " + users.length.toString());

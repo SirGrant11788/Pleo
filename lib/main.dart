@@ -36,6 +36,7 @@ Future<Post> fetchPost() async {
     print(post.data.length);//confirm number of users
 
     for (final element in post.data) {
+      debugPrint(element.merchant);//
       idList.add(element.id);
       valueList.add(element.value);
       currencyList.add(element.currency);
@@ -47,7 +48,7 @@ Future<Post> fetchPost() async {
       lastList.add(element.last);
       emailList.add(element.email);
       //todo
-      debugPrint(element.first.toString());
+      debugPrint(element.first);//
       //debugPrint('test id at 1: ${idList[1]}');
     }
 
@@ -199,23 +200,24 @@ class _MyHomePageState extends State<MyHomePage> {
 
     });
   }
-
-  //camera and gallery end
-  //search start
-  final duplicateItems = List<String>.generate(idList.length, (i) => idList[i]);
-  var items = List<String>();
-
   @override
   void initState() {
     super.initState();
     post = fetchPost();
     items.addAll(duplicateItems);
-
+    debugPrint("OVER HERE! "+duplicateItems[1]);
   }
+  //camera and gallery end
+  //search start
+  final duplicateItems = List<String>.generate(merchantList.length, (i) => merchantList[i]);
+  var items = List<String>();
+
+
 
   void filterSearchResults(String query) {
     List<String> dummySearchList = List<String>();
     dummySearchList.addAll(duplicateItems);
+
     if (query.isNotEmpty) {
       List<String> dummyListData = List<String>();
       dummySearchList.forEach((item) {
@@ -266,15 +268,18 @@ class _MyHomePageState extends State<MyHomePage> {
             Expanded(
               child: new ListView.builder(
                 shrinkWrap: true,
-                itemCount: items.length,
+                itemCount: items.length,//idList.length,
                 itemBuilder: (context, index) {
                   return Card(
                     child: ListTile(
                       leading: Icon(icons[
                           0]), //todo if pic else pleo default...'backend' cache
-                      title: Text('${items[index]}'), //todo title
+//                      title: Text('${merchantList[index]}'), //todo title
+                      title: Text('${merchantList[items.indexOf('${items[index]}')]}'), //todo title
+//                      title: Text('${items[index]}'), //todo title
                       subtitle: Text(
-                          '${merchantList[items.indexOf('${items[index]}')]}'), //todo date and time
+//                          '${dateList[index]}'), //todo date and time
+                          '${dateList[items.indexOf('${items[index]}')]}'), //todo date and time
                       trailing: Icon(Icons.keyboard_arrow_right),
                       onTap: () {
                         return showDialog<void>(
@@ -287,7 +292,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               //title: Text(titles[index]),
                               //todo add image and note sizing
                               content: Text(//const
-                                  '${merchantList[items.indexOf('${items[index]}')]} \n${valueList[items.indexOf('${items[index]}')]}\n${dateList[items.indexOf('${items[index]}')]} ${currencyList[items.indexOf('${items[index]}')]} \n${categoryList[items.indexOf('${items[index]}')]} \n${firstList[items.indexOf('${items[index]}')]} ${lastList[items.indexOf('${items[index]}')]} \n${emailList[items.indexOf('${items[index]}')]}\n${commentList[items.indexOf('${items[index]}')]}'),
+//                                  '${merchantList[index]} \n${dateList[index]}\n${valueList[index]} ${currencyList[index]} \n${categoryList[index]} \n${firstList[index]} ${lastList[index]} \n${emailList[index]}\n${commentList[index]}'),
+                                  '${merchantList[items.indexOf('${items[index]}')]} \n${dateList[items.indexOf('${items[index]}')]}\n${valueList[items.indexOf('${items[index]}')]} ${currencyList[items.indexOf('${items[index]}')]} \n${categoryList[items.indexOf('${items[index]}')]} \n${firstList[items.indexOf('${items[index]}')]} ${lastList[items.indexOf('${items[index]}')]} \n${emailList[items.indexOf('${items[index]}')]}\n${commentList[items.indexOf('${items[index]}')]}'),
                               actions: <Widget>[
                                 FlatButton(
                                   child: Text('Comment'),

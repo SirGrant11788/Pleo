@@ -7,160 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-final idList = [];
-final valueList = [];
-final currencyList = [];
-final dateList = [];
-final merchantList = [];
-//final receiptsList = [];
-final commentList = [];
-final categoryList = [];
-final firstList = [];
-final lastList = [];
-final emailList = [];
 
-Future<Post> fetchPost() async {
-  final response = await http.get('http://10.0.2.2:3000/expenses');
-
-//  //perform check//todo
-//  if (Platform.isAndroid) {
-//    final response = http.get("http://10.0.2.2:3000/expenses");
-//  } else // for iOS simulator
-//  {
-//    final response = http.get("http://localhost:3000/expenses");
-//  }
-
-  if (response.statusCode == 200) {
-    var json = jsonDecode(response.body) as Map<String, dynamic>;
-    var post = Post.fromJson(json);
-    print(post.data.length);//confirm number of users
-
-    for (final element in post.data) {
-      debugPrint(element.merchant);//
-      idList.add(element.id);
-//      valueList.add(element.value);
-//      currencyList.add(element.currency);
-      dateList.add(element.date);
-      merchantList.add(element.merchant);
-      commentList.add(element.comment);
-      categoryList.add(element.category);
-//      firstList.add(element.first);
-//      lastList.add(element.last);
-//      emailList.add(element.email);
-      //todo
-      //debugPrint(element.data.first);//
-      //debugPrint('test id at 1: ${idList[1]}');
-    }
-
-    return post;
-  } else {
-    // If that call was not successful, throw an error.
-    debugPrint("fetchPost else ran");
-    throw Exception('Failed to load post');
-  }
-}
-
-class Data {
-  SourceAmount amount;
-  SourceUser user;
-  String id;
-  String date;
-  String merchant;
-  String comment;
-  String category;
-  //final String receipts; //
-
-  Data(
-      {this.amount,
-        this.user,
-        this.id,
-        this.date,
-        this.merchant,
-        this.comment,
-        this.category,});
-
-  factory Data.fromJson(Map<String, dynamic> json) {
-    return Data(
-      amount: SourceAmount.fromJson(json["amount"]),
-      user: SourceUser.fromJson(json["user"]),
-      id: json['id'],
-      date: json['date'],
-      comment: json['comment'],
-      merchant: json['merchant'],
-      category: json['category'],
-      //receipts: json['receipts'],
-    );
-  }
-  Map<String, dynamic> toJson() {
-    return {
-      'comment': comment,
-      'id': id,
-      'date': date,
-      'merchant': merchant,
-//      'value': value,
-//      'currency': currency,
-      'category': category,
-//      'first': first,
-//      'last': last,
-//      'email': email,
-      //'receipts': receipts,
-    };
-  }
-}
-class SourceAmount{
-  String value;
-  String currency;
-
-  SourceAmount({this.value,this.currency});
-
-  factory SourceAmount.fromJson(Map<String, dynamic> json) {
-    return SourceAmount(
-      value: json["value"] as String,
-      currency: json["currency"] as String,
-    );
-  }
-}
-class SourceUser{
-  String first;
-  String last;
-  String email;
-
-  SourceUser({this.first,this.last,this.email});
-
-  factory SourceUser.fromJson(Map<String, dynamic> json) {
-    return SourceUser(
-      first: json["first"] as String,
-      last: json["last"] as String,
-      email: json["email"] as String,
-    );
-  }
-}
-class Post {
-  final List<Data> data;
-
-  Post({this.data});
-
-  factory Post.fromJson(Map<String, dynamic> json) {
-    return Post(
-      data: _toObjectList(json['expenses'], (e) => Data.fromJson(e)),
-    );
-  }
-}
-
-List<T> _toObjectList<T>(data, T Function(Map<String, dynamic>) fromJson) {
-  if (data == null) {
-    return null;
-  }
-  var result = <T>[];
-  for (var element in data) {
-    T value;
-    if (element != null) {
-      value = fromJson(element as Map<String, dynamic>);
-    }
-    result.add(value);
-  }
-  return result;
-}
 
 void main() {
   runApp(MyApp());
@@ -188,11 +35,20 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   TextEditingController editingController = TextEditingController();
-  Future<Post> post;
+//get
+  Map data;
+  List userData;
 
+  Future getData() async {
+    http.Response response = await http.get("http://10.0.2.2:3000/expenses");
+    data = json.decode(response.body);
+    setState(() {
+      userData = data["expenses"];
+    });
+  }
 
 //test data //todo
-  final icons = [
+  static final icons = [
     Icons.directions_bike,
   ];
 
@@ -220,13 +76,12 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    post = fetchPost();
+    getData();
     items.addAll(duplicateItems);
-    debugPrint("OVER HERE! "+duplicateItems[1]);
   }
   //camera and gallery end
   //search start
-  final duplicateItems = List<String>.generate(merchantList.length, (i) => merchantList[i]);
+  final duplicateItems = List<String>.generate(icons.length, (i) => icons[i].toString());//TODO fix search
   var items = List<String>();
 
 
@@ -285,23 +140,15 @@ class _MyHomePageState extends State<MyHomePage> {
             Expanded(
               child: new ListView.builder(
                 shrinkWrap: true,
-                itemCount: items.length,//idList.length,
-
-                itemBuilder: (context, index) {
-
+                itemCount: userData == null ? 0 : userData.length,
+                itemBuilder: (BuildContext context, int index) {
                   return Card(
-
                     child: ListTile(
-
                       leading: Icon(icons[
                           0]), //todo if pic else pleo default...'backend' cache
-//                      title: Text('${merchantList[index]}'), //todo title
-                      title: Text('${merchantList[items.indexOf('${items[index]}')]}'), //todo title
-
-//                      title: Text('${items[index]}'), //todo title
+                      title: Text('${userData[index]["merchant"]}'), //todo title
                       subtitle: Text(
-//                          '${dateList[index]}'), //todo date and time
-                          '${dateList[items.indexOf('${items[index]}')]}'), //todo date and time
+                          '${userData[index]["user"]["first"]} ${userData[index]["user"]["last"]}'), //todo date and time
                       trailing: Icon(Icons.keyboard_arrow_right),
                       onTap: () {
                         return showDialog<void>(
@@ -315,7 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               //todo add image and note sizing
                               content: Text(//const
 //                                  '${merchantList[index]} \n${dateList[index]}\n${valueList[index]} ${currencyList[index]} \n${categoryList[index]} \n${firstList[index]} ${lastList[index]} \n${emailList[index]}\n${commentList[index]}'),
-                                  '${merchantList[items.indexOf('${items[index]}')]} \n${dateList[items.indexOf('${items[index]}')]}\n${valueList[items.indexOf('${items[index]}')]} ${currencyList[items.indexOf('${items[index]}')]} \n${categoryList[items.indexOf('${items[index]}')]} \n${firstList[items.indexOf('${items[index]}')]} ${lastList[items.indexOf('${items[index]}')]} \n${emailList[items.indexOf('${items[index]}')]}\n${commentList[items.indexOf('${items[index]}')]}'),
+                                  '${userData[index]["merchant"]}\n${userData[index]["date"]}\n${userData[index]["amount"]["value"]} ${userData[index]["amount"]["currency"]}\n${userData[index]["category"]}\n${userData[index]["user"]["first"]} ${userData[index]["user"]["last"]}\n${userData[index]["user"]["email"]}\n${userData[index]["comment"]} '),
                               actions: <Widget>[
                                 FlatButton(
                                   child: Text('Comment'),
@@ -328,7 +175,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                       // dialog is dismissible with a tap on the barrier
                                       builder: (BuildContext context) {
                                         return AlertDialog(
-                                          title: Text(merchantList[index]),
+                                          title: Text(userData[index]["merchant"]),
                                           content: new Row(
                                             children: <Widget>[
                                               new Expanded(

@@ -53,7 +53,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   Padding(
                     padding: const EdgeInsets.all(10.0),
-                    child: Text("${userData[index]["merchant"]} ${userData[index]["comment"]}",
+                    child: Text("${userData[index]["merchant"]} ${userData[index]["user"]["first"]}",
                       style: TextStyle(
                         fontSize: 20.0,
                         fontWeight: FontWeight.w700,

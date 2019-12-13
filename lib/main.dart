@@ -38,17 +38,17 @@ Future<Post> fetchPost() async {
     for (final element in post.data) {
       debugPrint(element.merchant);//
       idList.add(element.id);
-      valueList.add(element.value);
-      currencyList.add(element.currency);
+//      valueList.add(element.value);
+//      currencyList.add(element.currency);
       dateList.add(element.date);
       merchantList.add(element.merchant);
       commentList.add(element.comment);
       categoryList.add(element.category);
-      firstList.add(element.first);
-      lastList.add(element.last);
-      emailList.add(element.email);
+//      firstList.add(element.first);
+//      lastList.add(element.last);
+//      emailList.add(element.email);
       //todo
-      debugPrint(element.first);//
+      //debugPrint(element.data.first);//
       //debugPrint('test id at 1: ${idList[1]}');
     }
 
@@ -61,43 +61,33 @@ Future<Post> fetchPost() async {
 }
 
 class Data {
-  final String comment;
-  final String id;
-  final String date;
-  final String merchant;
-  final String value;
-  final String currency;
-  final String category;
-  final String first;
-  final String last;
-  final String email;
+  SourceAmount amount;
+  SourceUser user;
+  String id;
+  String date;
+  String merchant;
+  String comment;
+  String category;
   //final String receipts; //
 
   Data(
-      {this.value,
-      this.currency,
-      this.category,
-      this.first,
-      this.last,
-      this.email,
-      //this.receipts,
-      this.comment,
-      this.id,
-      this.date,
-      this.merchant});
+      {this.amount,
+        this.user,
+        this.id,
+        this.date,
+        this.merchant,
+        this.comment,
+        this.category,});
 
   factory Data.fromJson(Map<String, dynamic> json) {
     return Data(
-      comment: json['comment'],
+      amount: SourceAmount.fromJson(json["amount"]),
+      user: SourceUser.fromJson(json["user"]),
       id: json['id'],
       date: json['date'],
+      comment: json['comment'],
       merchant: json['merchant'],
-      value: json['value'],
-      currency: json['currency'],
       category: json['category'],
-      first: json['first'],
-      last: json['last'],
-      email: json['email'],
       //receipts: json['receipts'],
     );
   }
@@ -107,17 +97,44 @@ class Data {
       'id': id,
       'date': date,
       'merchant': merchant,
-      'value': value,
-      'currency': currency,
+//      'value': value,
+//      'currency': currency,
       'category': category,
-      'first': first,
-      'last': last,
-      'email': email,
+//      'first': first,
+//      'last': last,
+//      'email': email,
       //'receipts': receipts,
     };
   }
 }
+class SourceAmount{
+  String value;
+  String currency;
 
+  SourceAmount({this.value,this.currency});
+
+  factory SourceAmount.fromJson(Map<String, dynamic> json) {
+    return SourceAmount(
+      value: json["value"] as String,
+      currency: json["currency"] as String,
+    );
+  }
+}
+class SourceUser{
+  String first;
+  String last;
+  String email;
+
+  SourceUser({this.first,this.last,this.email});
+
+  factory SourceUser.fromJson(Map<String, dynamic> json) {
+    return SourceUser(
+      first: json["first"] as String,
+      last: json["last"] as String,
+      email: json["email"] as String,
+    );
+  }
+}
 class Post {
   final List<Data> data;
 
@@ -269,13 +286,18 @@ class _MyHomePageState extends State<MyHomePage> {
               child: new ListView.builder(
                 shrinkWrap: true,
                 itemCount: items.length,//idList.length,
+
                 itemBuilder: (context, index) {
+
                   return Card(
+
                     child: ListTile(
+
                       leading: Icon(icons[
                           0]), //todo if pic else pleo default...'backend' cache
 //                      title: Text('${merchantList[index]}'), //todo title
                       title: Text('${merchantList[items.indexOf('${items[index]}')]}'), //todo title
+
 //                      title: Text('${items[index]}'), //todo title
                       subtitle: Text(
 //                          '${dateList[index]}'), //todo date and time

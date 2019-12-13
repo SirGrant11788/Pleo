@@ -7,8 +7,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-
-
 void main() {
   runApp(MyApp());
 }
@@ -28,7 +26,6 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -70,21 +67,21 @@ class _MyHomePageState extends State<MyHomePage> {
 
     setState(() {
       _image = image;
-
     });
   }
+
   @override
   void initState() {
     super.initState();
     getData();
     items.addAll(duplicateItems);
   }
+
   //camera and gallery end
   //search start
-  final duplicateItems = List<String>.generate(icons.length, (i) => icons[i].toString());//TODO fix search
+  final duplicateItems = List<String>.generate(
+      icons.length, (i) => icons[i].toString()); //TODO fix search
   var items = List<String>();
-
-
 
   void filterSearchResults(String query) {
     List<String> dummySearchList = List<String>();
@@ -140,13 +137,24 @@ class _MyHomePageState extends State<MyHomePage> {
             Expanded(
               child: new ListView.builder(
                 shrinkWrap: true,
-                itemCount: userData == null ? 0 : userData.length,
+                itemCount: userData.length,
                 itemBuilder: (BuildContext context, int index) {
+                  if (userData.length==0||userData.length==null) return Center(child: CircularProgressIndicator());//if there is no data
                   return Card(
                     child: ListTile(
-                      leading: Icon(icons[
-                          0]), //todo if pic else pleo default...'backend' cache
-                      title: Text('${userData[index]["merchant"]}'), //todo title
+                      leading:
+//                      Icon(icons[
+//                          0]), //todo if pic else pleo default...'backend' cache
+                      CircleAvatar(
+                        backgroundColor: Colors.red,
+                        child: Text(userData[index]["merchant"][0],
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              color: Colors.white,
+                            )),
+                      ),
+                      title:
+                          Text('${userData[index]["merchant"]}'), //todo title
                       subtitle: Text(
                           '${userData[index]["user"]["first"]} ${userData[index]["user"]["last"]}'), //todo date and time
                       trailing: Icon(Icons.keyboard_arrow_right),
@@ -175,7 +183,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                       // dialog is dismissible with a tap on the barrier
                                       builder: (BuildContext context) {
                                         return AlertDialog(
-                                          title: Text(userData[index]["merchant"]),
+                                          title:
+                                              Text(userData[index]["merchant"]),
                                           content: new Row(
                                             children: <Widget>[
                                               new Expanded(

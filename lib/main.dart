@@ -32,22 +32,24 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   TextEditingController editingController = TextEditingController();
+  String filter;
 //get
   Map data;
   List userData;
 
   Future getData() async {
-    http.Response response = await http.get("http://10.0.2.2:3000/expenses");
-    data = json.decode(response.body);
+    if (Platform.isAndroid) {
+      http.Response response = await http.get("http://10.0.2.2:3000/expenses");
+      data = json.decode(response.body);
+    } else {
+      http.Response response = await http.get("http://localhost:3000/expenses");
+      data = json.decode(response.body);
+    }
+
     setState(() {
       userData = data["expenses"];
     });
   }
-
-//test data //todo
-  static final icons = [
-    Icons.directions_bike,
-  ];
 
   //camera and gallery start//todo
   File _cameraImage;
@@ -74,40 +76,20 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     getData();
-    items.addAll(duplicateItems);
+    editingController.addListener(() {
+      setState(() {
+        filter = editingController.text;
+      });
+    });
   }
 
-  //camera and gallery end
-  //search start
-  final duplicateItems = List<String>.generate(
-      icons.length, (i) => icons[i].toString()); //TODO fix search
-  var items = List<String>();
-
-  void filterSearchResults(String query) {
-    List<String> dummySearchList = List<String>();
-    dummySearchList.addAll(duplicateItems);
-
-    if (query.isNotEmpty) {
-      List<String> dummyListData = List<String>();
-      dummySearchList.forEach((item) {
-        if (item.contains(query)) {
-          dummyListData.add(item);
-        }
-      });
-      setState(() {
-        items.clear();
-        items.addAll(dummyListData);
-      });
-      return;
-    } else {
-      setState(() {
-        items.clear();
-        items.addAll(duplicateItems);
-      });
-    }
+  @override
+  void dispose() {
+    editingController.dispose();
+    super.dispose();
   }
+//camera and gallery end
 
-  //search end
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -123,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
               padding: const EdgeInsets.all(8.0),
               child: TextField(
                 onChanged: (value) {
-                  filterSearchResults(value);
+                  //filterSearchResults(value);
                 },
                 controller: editingController, //todo fix
                 decoration: InputDecoration(
@@ -139,9 +121,110 @@ class _MyHomePageState extends State<MyHomePage> {
                 shrinkWrap: true,
                 itemCount: userData.length,
                 itemBuilder: (BuildContext context, int index) {
-                  if (userData.length==0||userData.length==null) return Center(child: CircularProgressIndicator());//if there is no data
-                  return Card(
-                    child: ListTile(
+                  if (userData.length == 0 || userData.length == null)
+                    return Center(
+                        child:
+                        CircularProgressIndicator()); //if there is no data
+                  return filter == null || filter == ""
+                      ? new Card(child: new ListTile(
+                    leading:
+//                      Icon(icons[
+//                          0]), //todo if pic else pleo default...'backend' cache
+                    CircleAvatar(
+                      backgroundColor: Colors.red,
+                      child: Text(userData[index]["merchant"][0],
+                          style: TextStyle(
+                            fontSize: 18.0,
+                            color: Colors.white,
+                          )),
+                    ),
+                    title:
+                    Text('${userData[index]["merchant"]}'), //todo title
+                    subtitle: Text(
+                        '${userData[index]["user"]["first"]} ${userData[index]["user"]["last"]}'), //todo date and time
+                    trailing: Icon(Icons.keyboard_arrow_right),
+                    onTap: () {
+                      return showDialog<void>(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Image.asset('assets/pleo.png',
+                                height: 200, width: 200),
+                            //title: Text(titles[index]),
+                            //todo add image and note sizing
+                            content: Text(//const
+                                '${userData[index]["merchant"]}\n${userData[index]["date"]}\n${userData[index]["amount"]["value"]} ${userData[index]["amount"]["currency"]}\n${userData[index]["category"]}\n${userData[index]["user"]["first"]} ${userData[index]["user"]["last"]}\n${userData[index]["user"]["email"]}\n${userData[index]["comment"]} '),
+                            actions: <Widget>[
+                              FlatButton(
+                                child: Text('Comment'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  String commentVar = '';
+                                  return showDialog<String>(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    // dialog is dismissible with a tap on the barrier
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title:
+                                        Text(userData[index]["merchant"]),
+                                        content: new Row(
+                                          children: <Widget>[
+                                            new Expanded(
+                                                child: new TextField(
+                                                  autofocus: true,
+                                                  decoration: new InputDecoration(
+                                                      labelText: 'Enter Comment',
+                                                      hintText:
+                                                      "eg. Starbucks for stand-up meeting."),
+                                                  onChanged: (value) {
+                                                    commentVar = value;
+                                                  },
+                                                ))
+                                          ],
+                                        ),
+                                        actions: <Widget>[
+                                          FlatButton(
+                                            child: Text('Ok'),
+                                            onPressed: () {
+                                              Navigator.of(context)
+                                                  .pop(commentVar);
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                  //end comment
+                                },
+                              ),
+                              FlatButton(
+                                child: Text('Add Photo'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  //TODO do something with receipt image
+                                  _pickImageFromGallery();
+                                },
+                              ),
+                              FlatButton(
+                                child: Text('Take Photo'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  //TODO do something with receipt image
+                                  _pickImageFromCamera();
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      ); //
+                    },
+                  ),
+                  )
+                      : userData[index]["merchant"].toLowerCase().contains(filter.toLowerCase())
+                      ? new Card(
+                    child: new ListTile(
                       leading:
 //                      Icon(icons[
 //                          0]), //todo if pic else pleo default...'backend' cache
@@ -154,7 +237,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             )),
                       ),
                       title:
-                          Text('${userData[index]["merchant"]}'), //todo title
+                      Text('${userData[index]["merchant"]}'), //todo title
                       subtitle: Text(
                           '${userData[index]["user"]["first"]} ${userData[index]["user"]["last"]}'), //todo date and time
                       trailing: Icon(Icons.keyboard_arrow_right),
@@ -169,7 +252,6 @@ class _MyHomePageState extends State<MyHomePage> {
                               //title: Text(titles[index]),
                               //todo add image and note sizing
                               content: Text(//const
-//                                  '${merchantList[index]} \n${dateList[index]}\n${valueList[index]} ${currencyList[index]} \n${categoryList[index]} \n${firstList[index]} ${lastList[index]} \n${emailList[index]}\n${commentList[index]}'),
                                   '${userData[index]["merchant"]}\n${userData[index]["date"]}\n${userData[index]["amount"]["value"]} ${userData[index]["amount"]["currency"]}\n${userData[index]["category"]}\n${userData[index]["user"]["first"]} ${userData[index]["user"]["last"]}\n${userData[index]["user"]["email"]}\n${userData[index]["comment"]} '),
                               actions: <Widget>[
                                 FlatButton(
@@ -184,20 +266,20 @@ class _MyHomePageState extends State<MyHomePage> {
                                       builder: (BuildContext context) {
                                         return AlertDialog(
                                           title:
-                                              Text(userData[index]["merchant"]),
+                                          Text(userData[index]["merchant"]),
                                           content: new Row(
                                             children: <Widget>[
                                               new Expanded(
                                                   child: new TextField(
-                                                autofocus: true,
-                                                decoration: new InputDecoration(
-                                                    labelText: 'Enter Comment',
-                                                    hintText:
+                                                    autofocus: true,
+                                                    decoration: new InputDecoration(
+                                                        labelText: 'Enter Comment',
+                                                        hintText:
                                                         "eg. Starbucks for stand-up meeting."),
-                                                onChanged: (value) {
-                                                  commentVar = value;
-                                                },
-                                              ))
+                                                    onChanged: (value) {
+                                                      commentVar = value;
+                                                    },
+                                                  ))
                                             ],
                                           ),
                                           actions: <Widget>[
@@ -237,7 +319,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         ); //
                       },
                     ),
-                  );
+                  )
+                      : new Container();
                 },
               ),
             ),

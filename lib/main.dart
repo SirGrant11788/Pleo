@@ -61,8 +61,10 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
   }
+//  //The following _CastError was thrown while handling a gesture:
+//  //type 'Future<Response>' is not a subtype of type 'Response' in type cast
   Future postComment() async {
-    if (Platform.isAndroid) {
+//    if (Platform.isAndroid) {
       Map<String, String> headers = {"Content-type": "application/json"};
       String data = json.encode(userData);//list of all data
 //      String data = json.encode(new Map.fromIterable(userData));//list of all data
@@ -72,11 +74,28 @@ class _MyHomePageState extends State<MyHomePage> {
       } else {
         throw "Comment NOT Updated: "+response.statusCode.toString();
       }
-    } else {
-      //todo IOS
-    }
+
+//    } else {
+//      //todo IOS
+//    }
 
   }
+//The following assertion was thrown while handling a gesture:
+//type 'Future<Response>' is not a subtype of type 'String' of 'result'
+//  Future<http.Response> postComment () async {
+//    var url ='http://10.0.2.2:3000/expenses/:id';
+//json.encode(new Map.fromIterable(userData));//list of all data//
+//    var body = json.encode(userData);//list of all data
+//    var response = await http.post(url,
+//        headers: {"Content-Type": "application/json"},
+//        body: body
+//    );
+//    print("${response.statusCode}");
+//    print("${response.body}");
+//    return response;
+//  }
+
+
 
   //camera and gallery start//todo
   File _cameraImage;
@@ -175,7 +194,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 barrierDismissible: true,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
-                                    title:
+                                    title://todo touch to enlarge image
                                     Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: <Widget>[
@@ -231,6 +250,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                                         commentVar = value;
                                                         //todo cleanup and repeat in searched
                                                         userData[index]["comment"] = value;
+                                                        debugPrint(userData[index]["comment"]);
 //                                                        comment = value;
                                                       },
                                                     ))
@@ -243,7 +263,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                                       Navigator.of(context)
 
                                                           .pop(postComment());////////
-
+                                                     //
 //                                                          .pop(postComment(comment,index.toString()));
                                                           //.pop(commentVar);//todo cleanup and confirm post to api
                                                     },

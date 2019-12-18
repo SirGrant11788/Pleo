@@ -14,7 +14,7 @@ description: Pleo&#x27;s Coding Challenge
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.2.2 <3.0.0"
 
 dependencies:
   flutter:
@@ -22,7 +22,6 @@ dependencies:
   image_picker: ^0.6.2+1
   logger: ^0.6.0
   http: ^0.12.0+2
-  dio: ^3.0.7
   carousel_pro: ^1.0.0
 
   # The following adds the Cupertino Icons font to your application.

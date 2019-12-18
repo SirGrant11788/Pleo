@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:dio/dio.dart';
 import 'package:carousel_pro/carousel_pro.dart';
 
 void main() {
@@ -47,7 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
       http.Response response = await http.get("http://10.0.2.2:3000/expenses");
       data = json.decode(response.body);
     } else {
-      http.Response response = await http.get("http://localhost:3000/expenses");
+      http.Response response = await http.get("http://localhost:3000/expenses");//note the change in address. Emulator testing
       data = json.decode(response.body);
     }
 
@@ -59,9 +58,8 @@ class _MyHomePageState extends State<MyHomePage> {
 //issue:Connection closed before full header was received
   Future postComment() async {
     try {
-//    if (Platform.isAndroid) {
+    if (Platform.isAndroid) {
       Map<String, String> headers = {"Content-type": "application/json"};
-      //print('\nTESTING DATA\n ${data['expenses'][0]} \nTESTING DATA\n ');// ¯\_(ツ)_/¯ it works. receives updated comment
       String dataAll = json.encode(data); //list of all data
       debugPrint('postComment ran before http.post');
       http.Response response = await http.post(
@@ -79,16 +77,32 @@ class _MyHomePageState extends State<MyHomePage> {
             "\n\n";
       }
 
-//    } else {
-//      //todo IOS localhost
-//    }
+    } else {
+      Map<String, String> headers = {"Content-type": "application/json"};
+      String dataAll = json.encode(data); //list of all data
+      debugPrint('postComment ran before http.post');
+      http.Response response = await http.post(
+          "http://localhost:3000/expenses/:id",//note the change in address. Emulator testing
+          headers: headers,
+          body: dataAll);
+      debugPrint('postComment ran past http.post');
+      if (response.statusCode == 200) {
+        print("Comment Updated: " + response.statusCode.toString());
+      } else {
+        throw "Comment NOT Updated: " +
+            response.statusCode.toString() +
+            "\n\n" +
+            response.body +
+            "\n\n";
+      }
+    }
     } catch (e) {
       print('ERROR postComment!: $e');
     }
   }
 
 
-  //camera and gallery start//todo
+  //camera and gallery start
   File _cameraImage;
   File _image;
   _pickImageFromCamera() async {
@@ -187,15 +201,13 @@ class _MyHomePageState extends State<MyHomePage> {
                                         Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: <Widget>[
+                                        if(userData[index]["receipts"].length == 0)
                                         SizedBox(
                                             height: 200.0,
                                             width: 200.0,
                                             child: Carousel(
                                               images: [
-                                                //ExactAssetImage('assets/pleo.png'),//round corner
                                                 Image.asset('assets/pleo.png'),
-                                                Image.asset('assets/sun.jpg'),
-                                                Image.asset('assets/pleo.png')
                                               ],
                                               dotSize: 4.0,
                                               dotSpacing: 15.0,
@@ -204,10 +216,24 @@ class _MyHomePageState extends State<MyHomePage> {
                                               dotBgColor:
                                                   Colors.red.withOpacity(0.5),
                                             )),
+                                        if(userData[index]["receipts"].length >0)
+                                          SizedBox(
+                                              height: 200.0,
+                                              width: 200.0,
+                                              child: Carousel(//todo pic array expand
+                                                images: [
+                                                  Image.file(userData[index]["receipts"][0]),
+                                                ],
+                                                dotSize: 4.0,
+                                                dotSpacing: 15.0,
+                                                dotColor: Colors.pink,
+                                                indicatorBgPadding: 5.0,
+                                                dotBgColor:
+                                                Colors.red.withOpacity(0.5),
+                                              )),
                                       ],
-                                    ),
 
-                                    //todo add image and note sizing
+                                    ),
                                     content: Text(//const
                                         '${userData[index]["merchant"]}\n${userData[index]["date"]}\n${userData[index]["amount"]["value"]} ${userData[index]["amount"]["currency"]}\n${userData[index]["category"]}\n${userData[index]["user"]["first"]} ${userData[index]["user"]["last"]}\n${userData[index]["user"]["email"]}\n${userData[index]["comment"]} '),
                                     actions: <Widget>[
@@ -215,7 +241,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                         child: Text('Comment'),
                                         onPressed: () {
                                           Navigator.of(context).pop();
-                                          String commentVar = '';
                                           return showDialog<String>(
                                             context: context,
                                             barrierDismissible: true,
@@ -235,13 +260,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                                           hintText:
                                                               "eg. Starbucks for stand-up meeting."),
                                                       onChanged: (value) {
-                                                        commentVar = value;
-                                                        //todo cleanup and repeat in searched
                                                         userData[index]
                                                             ["comment"] = value;
 
-                                                        //debugPrint(jsonData.toString());
-//                                                        comment = value;
                                                       },
                                                     ))
                                                   ],
@@ -266,16 +287,16 @@ class _MyHomePageState extends State<MyHomePage> {
                                         child: Text('Add Photo'),
                                         onPressed: () {
                                           Navigator.of(context).pop();
-                                          //TODO do something with receipt image
                                           _pickImageFromGallery();
+                                          userData[index]["receipts"][0] = _image;
                                         },
                                       ),
                                       FlatButton(
                                         child: Text('Take Photo'),
                                         onPressed: () {
                                           Navigator.of(context).pop();
-                                          //TODO do something with receipt image
                                           _pickImageFromCamera();
+                                          userData[index]["receipts"][0] = _cameraImage;
                                         },
                                       ),
                                     ],
@@ -311,29 +332,38 @@ class _MyHomePageState extends State<MyHomePage> {
                                         title: Column(
                                           mainAxisSize: MainAxisSize.min,
                                           children: <Widget>[
-                                            SizedBox(
-                                                height: 200.0,
-                                                width: 200.0,
-                                                child: Carousel(
-                                                  images: [
-                                                    Image.asset(
-                                                        'assets/pleo.png'),
-                                                    Image.asset(
-                                                        'assets/pleo.png'),
-                                                    Image.asset(
-                                                        'assets/pleo.png')
-                                                  ],
-                                                  dotSize: 4.0,
-                                                  dotSpacing: 15.0,
-                                                  dotColor: Colors.pink,
-                                                  indicatorBgPadding: 5.0,
-                                                  dotBgColor: Colors.red
-                                                      .withOpacity(0.5),
-                                                  borderRadius: true,
-                                                )),
+                                            if(userData[index]["receipts"].length == 0)
+                                              SizedBox(
+                                                  height: 200.0,
+                                                  width: 200.0,
+                                                  child: Carousel(
+                                                    images: [
+                                                      Image.asset('assets/pleo.png'),
+                                                    ],
+                                                    dotSize: 4.0,
+                                                    dotSpacing: 15.0,
+                                                    dotColor: Colors.pink,
+                                                    indicatorBgPadding: 5.0,
+                                                    dotBgColor:
+                                                    Colors.red.withOpacity(0.5),
+                                                  )),
+                                            if(userData[index]["receipts"].length >0)
+                                              SizedBox(
+                                                  height: 200.0,
+                                                  width: 200.0,
+                                                  child: Carousel(//todo pic array expand
+                                                    images: [
+                                                      Image.file(userData[index]["receipts"][0]),
+                                                    ],
+                                                    dotSize: 4.0,
+                                                    dotSpacing: 15.0,
+                                                    dotColor: Colors.pink,
+                                                    indicatorBgPadding: 5.0,
+                                                    dotBgColor:
+                                                    Colors.red.withOpacity(0.5),
+                                                  )),
                                           ],
                                         ),
-                                        //todo add image and note sizing
                                         content: Text(//const
                                             '${userData[index]["merchant"]}\n${userData[index]["date"]}\n${userData[index]["amount"]["value"]} ${userData[index]["amount"]["currency"]}\n${userData[index]["category"]}\n${userData[index]["user"]["first"]} ${userData[index]["user"]["last"]}\n${userData[index]["user"]["email"]}\n${userData[index]["comment"]} '),
                                         actions: <Widget>[
@@ -341,7 +371,6 @@ class _MyHomePageState extends State<MyHomePage> {
                                             child: Text('Comment'),
                                             onPressed: () {
                                               Navigator.of(context).pop();
-                                              String commentVar = '';
                                               return showDialog<String>(
                                                 context: context,
                                                 barrierDismissible: true,
@@ -362,18 +391,21 @@ class _MyHomePageState extends State<MyHomePage> {
                                                                   'Enter Comment',
                                                               hintText:
                                                                   "eg. Starbucks for stand-up meeting."),
-                                                          onChanged: (value) {
-                                                            commentVar = value;
-                                                          },
-                                                        ))
+                                                                  onChanged: (value) {
+                                                                    userData[index]
+                                                                    ["comment"] = value;
+                                                                  },
+                                                                )
+                                                        )
                                                       ],
                                                     ),
                                                     actions: <Widget>[
                                                       FlatButton(
                                                         child: Text('Ok'),
                                                         onPressed: () {
+                                                          postComment(); //
                                                           Navigator.of(context)
-                                                              .pop(commentVar);
+                                                              .pop();
                                                         },
                                                       ),
                                                     ],
@@ -387,7 +419,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                             child: Text('Add Photo'),
                                             onPressed: () {
                                               Navigator.of(context).pop();
-                                              //TODO do something with receipt image
+                                              userData[index]["receipts"][0] = _image;
                                               _pickImageFromGallery();
                                             },
                                           ),
@@ -395,7 +427,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                             child: Text('Take Photo'),
                                             onPressed: () {
                                               Navigator.of(context).pop();
-                                              //TODO do something with receipt image
+                                              userData[index]["receipts"][0] = _cameraImage;
                                               _pickImageFromCamera();
                                             },
                                           ),
@@ -416,20 +448,4 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
-//  } else {
-//    return ListView.separated(
-//      itemCount: europeanCountries.length,
-//      itemBuilder: (context, index) {
-//        return ListTile(
-//          leading: CircleAvatar(
-//            backgroundImage: AssetImage('assets/sun.jpg'),
-//          ),
-//          title: Text(europeanCountries[index]),
-//          subtitle: Text('test'),
-//        );
-//      },
-//      separatorBuilder: (context, index) {
-//        return Divider();
-//      },
-//    );
-//  } //else
+

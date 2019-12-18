@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+import 'package:dio/dio.dart';
 import 'package:carousel_pro/carousel_pro.dart';
 
 void main() {
@@ -57,28 +57,51 @@ class _MyHomePageState extends State<MyHomePage> {
       //debugPrint(data.toString());
 //      test= new Map.fromIterable(userData);
 //      debugPrint('!DEBUG !: ${userData[0]["merchant"]} \n\n\n ${test.toString()} \n\n\n ${userData}');
-
     });
-
   }
 //  //The following _CastError was thrown while handling a gesture:
 //  //type 'Future<Response>' is not a subtype of type 'Response' in type cast
+
+//    postComment() async {
+//      var dio = Dio();
+//      try {
+//        print('TESTING: ${new Map.fromIterable(userData)}');
+//        FormData formData = new FormData.fromMap(new Map.fromIterable(userData));
+//        var response = await dio.post(
+//            "http://10.0.2.2:3000/expenses", data: formData);
+//        return response.data;
+//      } catch (e) {
+//        print('ERROR postComment!: $e');
+//      }
+//    }
+
   Future postComment() async {
+    try {
 //    if (Platform.isAndroid) {
       Map<String, String> headers = {"Content-type": "application/json"};
-      String data = json.encode(userData);//list of all data
-//      String data = json.encode(new Map.fromIterable(userData));//list of all data
-      http.Response response = await http.post("http://10.0.2.2:3000/expenses/:id",headers: headers,body: data);
+      print('\nTESTING DATA\n ${data['expenses'][0]} \nTESTING DATA\n ');// ¯\_(ツ)_/¯ it works. receives updated comment
+//      String dataAll = json.encode(new Map.fromIterable(userData)); //list of all data
+      String dataAll = json.encode(data); //list of all data
+      http.Response response = await http.post(
+          "http://10.0.2.2:3000/expenses/:id",
+          headers: headers,
+          body: dataAll);
       if (response.statusCode == 200) {
-        print("Comment Updated: "+response.statusCode.toString());
+        print("Comment Updated: " + response.statusCode.toString());
       } else {
-        throw "Comment NOT Updated: "+response.statusCode.toString();
+        throw "Comment NOT Updated: " +
+            response.statusCode.toString() +
+            "\n\n" +
+            response.body +
+            "\n\n";
       }
 
 //    } else {
 //      //todo IOS
 //    }
-
+    } catch (e) {
+      print('ERROR postComment!: $e');
+    }
   }
 //The following assertion was thrown while handling a gesture:
 //type 'Future<Response>' is not a subtype of type 'String' of 'result'
@@ -94,8 +117,6 @@ class _MyHomePageState extends State<MyHomePage> {
 //    print("${response.body}");
 //    return response;
 //  }
-
-
 
   //camera and gallery start//todo
   File _cameraImage;
@@ -174,8 +195,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   return filter == null || filter == ""
                       ? new Card(
                           child: new ListTile(
-                            leading:
-                                CircleAvatar(
+                            leading: CircleAvatar(
                               backgroundColor: Colors.red,
                               child: Text(userData[index]["merchant"][0],
                                   style: TextStyle(
@@ -183,8 +203,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     color: Colors.white,
                                   )),
                             ),
-                            title: Text(
-                                '${userData[index]["merchant"]}'),
+                            title: Text('${userData[index]["merchant"]}'),
                             subtitle: Text(
                                 '${userData[index]["user"]["first"]} ${userData[index]["user"]["last"]}'),
                             trailing: Icon(Icons.keyboard_arrow_right),
@@ -194,30 +213,29 @@ class _MyHomePageState extends State<MyHomePage> {
                                 barrierDismissible: true,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
-                                    title://todo touch to enlarge image
-                                    Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: <Widget>[
-                                          SizedBox(
-                                              height: 200.0,
-                                              width: 200.0,
-                                              child: Carousel(
-                                                images: [
-                                                  //ExactAssetImage('assets/pleo.png'),//round corner
-                                                  Image.asset('assets/pleo.png'),
-                                                  Image.asset('assets/sun.jpg'),
-                                                  Image.asset('assets/pleo.png')
-                                                ],
-
-                                                dotSize: 4.0,
-                                                dotSpacing: 15.0,
-                                                dotColor: Colors.pink,
-                                                indicatorBgPadding: 5.0,
-                                                dotBgColor: Colors.red.withOpacity(0.5),
-                                              )
-                                          ),
-                                  ],
-                                  ),
+                                    title: //todo touch to enlarge image
+                                        Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        SizedBox(
+                                            height: 200.0,
+                                            width: 200.0,
+                                            child: Carousel(
+                                              images: [
+                                                //ExactAssetImage('assets/pleo.png'),//round corner
+                                                Image.asset('assets/pleo.png'),
+                                                Image.asset('assets/sun.jpg'),
+                                                Image.asset('assets/pleo.png')
+                                              ],
+                                              dotSize: 4.0,
+                                              dotSpacing: 15.0,
+                                              dotColor: Colors.pink,
+                                              indicatorBgPadding: 5.0,
+                                              dotBgColor:
+                                                  Colors.red.withOpacity(0.5),
+                                            )),
+                                      ],
+                                    ),
 
                                     //todo add image and note sizing
                                     content: Text(//const
@@ -249,8 +267,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                                       onChanged: (value) {
                                                         commentVar = value;
                                                         //todo cleanup and repeat in searched
-                                                        userData[index]["comment"] = value;
-                                                        debugPrint(userData[index]["comment"]);
+                                                        userData[index]
+                                                            ["comment"] = value;
+
+                                                        //debugPrint(jsonData.toString());
 //                                                        comment = value;
                                                       },
                                                     ))
@@ -260,12 +280,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                                   FlatButton(
                                                     child: Text('Ok'),
                                                     onPressed: () {
+                                                      postComment(); //
                                                       Navigator.of(context)
-
-                                                          .pop(postComment());////////
-                                                     //
-//                                                          .pop(postComment(comment,index.toString()));
-                                                          //.pop(commentVar);//todo cleanup and confirm post to api
+                                                          .pop();
                                                     },
                                                   ),
                                                 ],
@@ -298,13 +315,12 @@ class _MyHomePageState extends State<MyHomePage> {
                             },
                           ),
                         )
-                      : userData[index]["merchant"]//redisplay searched
+                      : userData[index]["merchant"] //redisplay searched
                               .toLowerCase()
                               .contains(filter.toLowerCase())
                           ? new Card(
                               child: new ListTile(
-                                leading:
-                                    CircleAvatar(
+                                leading: CircleAvatar(
                                   backgroundColor: Colors.red,
                                   child: Text(userData[index]["merchant"][0],
                                       style: TextStyle(
@@ -312,8 +328,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                         color: Colors.white,
                                       )),
                                 ),
-                                title: Text(
-                                    '${userData[index]["merchant"]}'),
+                                title: Text('${userData[index]["merchant"]}'),
                                 subtitle: Text(
                                     '${userData[index]["user"]["first"]} ${userData[index]["user"]["last"]}'),
                                 trailing: Icon(Icons.keyboard_arrow_right),
@@ -331,18 +346,21 @@ class _MyHomePageState extends State<MyHomePage> {
                                                 width: 200.0,
                                                 child: Carousel(
                                                   images: [
-                                                    Image.asset('assets/pleo.png'),
-                                                    Image.asset('assets/pleo.png'),
-                                                    Image.asset('assets/pleo.png')
+                                                    Image.asset(
+                                                        'assets/pleo.png'),
+                                                    Image.asset(
+                                                        'assets/pleo.png'),
+                                                    Image.asset(
+                                                        'assets/pleo.png')
                                                   ],
                                                   dotSize: 4.0,
                                                   dotSpacing: 15.0,
                                                   dotColor: Colors.pink,
                                                   indicatorBgPadding: 5.0,
-                                                  dotBgColor: Colors.red.withOpacity(0.5),
+                                                  dotBgColor: Colors.red
+                                                      .withOpacity(0.5),
                                                   borderRadius: true,
-                                                )
-                                            ),
+                                                )),
                                           ],
                                         ),
                                         //todo add image and note sizing

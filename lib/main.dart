@@ -53,39 +53,22 @@ class _MyHomePageState extends State<MyHomePage> {
 
     setState(() {
       userData = data["expenses"];
-      //data=data.update('id','5b996064dfd5b783915112f5',data['comment'] = "first com";);
-      //debugPrint(data.toString());
-//      test= new Map.fromIterable(userData);
-//      debugPrint('!DEBUG !: ${userData[0]["merchant"]} \n\n\n ${test.toString()} \n\n\n ${userData}');
-    });
+   });
   }
-//  //The following _CastError was thrown while handling a gesture:
-//  //type 'Future<Response>' is not a subtype of type 'Response' in type cast
 
-//    postComment() async {
-//      var dio = Dio();
-//      try {
-//        print('TESTING: ${new Map.fromIterable(userData)}');
-//        FormData formData = new FormData.fromMap(new Map.fromIterable(userData));
-//        var response = await dio.post(
-//            "http://10.0.2.2:3000/expenses", data: formData);
-//        return response.data;
-//      } catch (e) {
-//        print('ERROR postComment!: $e');
-//      }
-//    }
-
+//issue:Connection closed before full header was received
   Future postComment() async {
     try {
 //    if (Platform.isAndroid) {
       Map<String, String> headers = {"Content-type": "application/json"};
-      print('\nTESTING DATA\n ${data['expenses'][0]} \nTESTING DATA\n ');// ¯\_(ツ)_/¯ it works. receives updated comment
-//      String dataAll = json.encode(new Map.fromIterable(userData)); //list of all data
+      //print('\nTESTING DATA\n ${data['expenses'][0]} \nTESTING DATA\n ');// ¯\_(ツ)_/¯ it works. receives updated comment
       String dataAll = json.encode(data); //list of all data
+      debugPrint('postComment ran before http.post');
       http.Response response = await http.post(
           "http://10.0.2.2:3000/expenses/:id",
           headers: headers,
           body: dataAll);
+      debugPrint('postComment ran past http.post');
       if (response.statusCode == 200) {
         print("Comment Updated: " + response.statusCode.toString());
       } else {
@@ -97,26 +80,13 @@ class _MyHomePageState extends State<MyHomePage> {
       }
 
 //    } else {
-//      //todo IOS
+//      //todo IOS localhost
 //    }
     } catch (e) {
       print('ERROR postComment!: $e');
     }
   }
-//The following assertion was thrown while handling a gesture:
-//type 'Future<Response>' is not a subtype of type 'String' of 'result'
-//  Future<http.Response> postComment () async {
-//    var url ='http://10.0.2.2:3000/expenses/:id';
-//json.encode(new Map.fromIterable(userData));//list of all data//
-//    var body = json.encode(userData);//list of all data
-//    var response = await http.post(url,
-//        headers: {"Content-Type": "application/json"},
-//        body: body
-//    );
-//    print("${response.statusCode}");
-//    print("${response.body}");
-//    return response;
-//  }
+
 
   //camera and gallery start//todo
   File _cameraImage;

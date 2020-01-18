@@ -177,267 +177,11 @@ class _MyHomePageState extends State<MyHomePage> {
                         child:
                             CircularProgressIndicator()); //if there is no data
                   return filter == null || filter == ""
-                      ? new Card(
-                          child: new ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: Colors.red,
-                              child: Text(userData[index]["merchant"][0],
-                                  style: TextStyle(
-                                    fontSize: 18.0,
-                                    color: Colors.white,
-                                  )),
-                            ),
-                            title: Text('${userData[index]["merchant"]}'),
-                            subtitle: Text(
-                                '${userData[index]["user"]["first"]} ${userData[index]["user"]["last"]}'),
-                            trailing: Icon(Icons.keyboard_arrow_right),
-                            onTap: () {
-                              return showDialog<void>(
-                                context: context,
-                                barrierDismissible: true,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: //todo touch to enlarge image
-                                        Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: <Widget>[
-                                        if(userData[index]["receipts"].length == 0)
-                                        SizedBox(
-                                            height: 200.0,
-                                            width: 200.0,
-                                            child: Carousel(
-                                              images: [
-                                                Image.asset('assets/pleo.png'),
-                                              ],
-                                              dotSize: 4.0,
-                                              dotSpacing: 15.0,
-                                              dotColor: Colors.pink,
-                                              indicatorBgPadding: 5.0,
-                                              dotBgColor:
-                                                  Colors.red.withOpacity(0.5),
-                                            )),
-                                        if(userData[index]["receipts"].length >0)
-                                          SizedBox(
-                                              height: 200.0,
-                                              width: 200.0,
-                                              child: Carousel(//todo pic array expand
-                                                images: [
-                                                  Image.file(userData[index]["receipts"][0]),
-                                                ],
-                                                dotSize: 4.0,
-                                                dotSpacing: 15.0,
-                                                dotColor: Colors.pink,
-                                                indicatorBgPadding: 5.0,
-                                                dotBgColor:
-                                                Colors.red.withOpacity(0.5),
-                                              )),
-                                      ],
-
-                                    ),
-                                    content: Text(//const
-                                        '${userData[index]["merchant"]}\n${userData[index]["date"]}\n${userData[index]["amount"]["value"]} ${userData[index]["amount"]["currency"]}\n${userData[index]["category"]}\n${userData[index]["user"]["first"]} ${userData[index]["user"]["last"]}\n${userData[index]["user"]["email"]}\n${userData[index]["comment"]} '),
-                                    actions: <Widget>[
-                                      FlatButton(
-                                        child: Text('Comment'),
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                          return showDialog<String>(
-                                            context: context,
-                                            barrierDismissible: true,
-                                            // dialog is dismissible with a tap on the barrier
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                title: Text(userData[index]
-                                                    ["merchant"]),
-                                                content: new Row(
-                                                  children: <Widget>[
-                                                    new Expanded(
-                                                        child: new TextField(
-                                                      autofocus: true,
-                                                      decoration: new InputDecoration(
-                                                          labelText:
-                                                              'Enter Comment',
-                                                          hintText:
-                                                              "eg. Starbucks for stand-up meeting."),
-                                                      onChanged: (value) {
-                                                        userData[index]
-                                                            ["comment"] = value;
-
-                                                      },
-                                                    ))
-                                                  ],
-                                                ),
-                                                actions: <Widget>[
-                                                  FlatButton(
-                                                    child: Text('Ok'),
-                                                    onPressed: () {
-                                                      postComment(); //
-                                                      Navigator.of(context)
-                                                          .pop();
-                                                    },
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-                                          //end comment
-                                        },
-                                      ),
-                                      FlatButton(
-                                        child: Text('Add Photo'),
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                          _pickImageFromGallery();
-                                          userData[index]["receipts"][0] = _image;
-                                        },
-                                      ),
-                                      FlatButton(
-                                        child: Text('Take Photo'),
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                          _pickImageFromCamera();
-                                          userData[index]["receipts"][0] = _cameraImage;
-                                        },
-                                      ),
-                                    ],
-                                  );
-                                },
-                              ); //
-                            },
-                          ),
-                        )
+                      ? buildCard(index, context)
                       : userData[index]["merchant"] //redisplay searched
                               .toLowerCase()
                               .contains(filter.toLowerCase())
-                          ? new Card(
-                              child: new ListTile(
-                                leading: CircleAvatar(
-                                  backgroundColor: Colors.red,
-                                  child: Text(userData[index]["merchant"][0],
-                                      style: TextStyle(
-                                        fontSize: 18.0,
-                                        color: Colors.white,
-                                      )),
-                                ),
-                                title: Text('${userData[index]["merchant"]}'),
-                                subtitle: Text(
-                                    '${userData[index]["user"]["first"]} ${userData[index]["user"]["last"]}'),
-                                trailing: Icon(Icons.keyboard_arrow_right),
-                                onTap: () {
-                                  return showDialog<void>(
-                                    context: context,
-                                    barrierDismissible: true,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: <Widget>[
-                                            if(userData[index]["receipts"].length == 0)
-                                              SizedBox(
-                                                  height: 200.0,
-                                                  width: 200.0,
-                                                  child: Carousel(
-                                                    images: [
-                                                      Image.asset('assets/pleo.png'),
-                                                    ],
-                                                    dotSize: 4.0,
-                                                    dotSpacing: 15.0,
-                                                    dotColor: Colors.pink,
-                                                    indicatorBgPadding: 5.0,
-                                                    dotBgColor:
-                                                    Colors.red.withOpacity(0.5),
-                                                  )),
-                                            if(userData[index]["receipts"].length >0)
-                                              SizedBox(
-                                                  height: 200.0,
-                                                  width: 200.0,
-                                                  child: Carousel(//todo pic array expand
-                                                    images: [
-                                                      Image.file(userData[index]["receipts"][0]),
-                                                    ],
-                                                    dotSize: 4.0,
-                                                    dotSpacing: 15.0,
-                                                    dotColor: Colors.pink,
-                                                    indicatorBgPadding: 5.0,
-                                                    dotBgColor:
-                                                    Colors.red.withOpacity(0.5),
-                                                  )),
-                                          ],
-                                        ),
-                                        content: Text(//const
-                                            '${userData[index]["merchant"]}\n${userData[index]["date"]}\n${userData[index]["amount"]["value"]} ${userData[index]["amount"]["currency"]}\n${userData[index]["category"]}\n${userData[index]["user"]["first"]} ${userData[index]["user"]["last"]}\n${userData[index]["user"]["email"]}\n${userData[index]["comment"]} '),
-                                        actions: <Widget>[
-                                          FlatButton(
-                                            child: Text('Comment'),
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                              return showDialog<String>(
-                                                context: context,
-                                                barrierDismissible: true,
-                                                // dialog is dismissible with a tap on the barrier
-                                                builder:
-                                                    (BuildContext context) {
-                                                  return AlertDialog(
-                                                    title: Text(userData[index]
-                                                        ["merchant"]),
-                                                    content: new Row(
-                                                      children: <Widget>[
-                                                        new Expanded(
-                                                            child:
-                                                                new TextField(
-                                                          autofocus: true,
-                                                          decoration: new InputDecoration(
-                                                              labelText:
-                                                                  'Enter Comment',
-                                                              hintText:
-                                                                  "eg. Starbucks for stand-up meeting."),
-                                                                  onChanged: (value) {
-                                                                    userData[index]
-                                                                    ["comment"] = value;
-                                                                  },
-                                                                )
-                                                        )
-                                                      ],
-                                                    ),
-                                                    actions: <Widget>[
-                                                      FlatButton(
-                                                        child: Text('Ok'),
-                                                        onPressed: () {
-                                                          postComment(); //
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        },
-                                                      ),
-                                                    ],
-                                                  );
-                                                },
-                                              );
-                                              //end comment
-                                            },
-                                          ),
-                                          FlatButton(
-                                            child: Text('Add Photo'),
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                              userData[index]["receipts"][0] = _image;
-                                              _pickImageFromGallery();
-                                            },
-                                          ),
-                                          FlatButton(
-                                            child: Text('Take Photo'),
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                              userData[index]["receipts"][0] = _cameraImage;
-                                              _pickImageFromCamera();
-                                            },
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  ); //
-                                },
-                              ),
-                            )
+                          ? buildCard(index, context)
                           : new Container();
                 },
               ),
@@ -446,6 +190,141 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
+  }
+
+  Card buildCard(int index, BuildContext context) {
+    return new Card(
+      child: new ListTile(
+        leading: CircleAvatar(
+          backgroundColor: Colors.red,
+          child: Text(userData[index]["merchant"][0],
+              style: TextStyle(
+                fontSize: 18.0,
+                color: Colors.white,
+              )),
+        ),
+        title: Text('${userData[index]["merchant"]}'),
+        subtitle: Text(
+            '${userData[index]["user"]["first"]} ${userData[index]["user"]["last"]}'),
+        trailing: Icon(Icons.keyboard_arrow_right),
+        onTap: () {
+          return showDialog<void>(
+            context: context,
+            barrierDismissible: true,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: //todo touch to enlarge image
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    if(userData[index]["receipts"].length == 0)
+                      SizedBox(
+                          height: 200.0,
+                          width: 200.0,
+                          child: Carousel(
+                            images: [
+                              Image.asset('assets/pleo.png'),
+                            ],
+                            dotSize: 4.0,
+                            dotSpacing: 15.0,
+                            dotColor: Colors.pink,
+                            indicatorBgPadding: 5.0,
+                            dotBgColor:
+                            Colors.red.withOpacity(0.5),
+                          )),
+                    if(userData[index]["receipts"].length !=0)
+                      SizedBox(
+                          height: 200.0,
+                          width: 200.0,
+                          child: Carousel(//todo pic array expand
+                            images: [
+                              Image.file(userData[index]["receipts"]),
+                            ],
+                            dotSize: 4.0,
+                            dotSpacing: 15.0,
+                            dotColor: Colors.pink,
+                            indicatorBgPadding: 5.0,
+                            dotBgColor:
+                            Colors.red.withOpacity(0.5),
+                          )),
+                  ],
+
+                ),
+                content: Text(//const
+                    '${userData[index]["merchant"]}\n${userData[index]["date"]}\n${userData[index]["amount"]["value"]} ${userData[index]["amount"]["currency"]}\n${userData[index]["category"]}\n${userData[index]["user"]["first"]} ${userData[index]["user"]["last"]}\n${userData[index]["user"]["email"]}\n${userData[index]["comment"]} '),
+                actions: <Widget>[
+                  FlatButton(
+                    child: Text('Comment'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      return showDialog<String>(
+                        context: context,
+                        barrierDismissible: true,
+                        // dialog is dismissible with a tap on the barrier
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text(userData[index]
+                            ["merchant"]),
+                            content: new Row(
+                              children: <Widget>[
+                                new Expanded(
+                                    child: new TextField(
+                                      autofocus: true,
+                                      decoration: new InputDecoration(
+                                          labelText:
+                                          'Enter Comment',
+                                          hintText:
+                                          "eg. Starbucks for stand-up meeting."),
+                                      onChanged: (value) {
+                                        userData[index]
+                                        ["comment"] = value;
+
+                                      },
+                                    ))
+                              ],
+                            ),
+                            actions: <Widget>[
+                              FlatButton(
+                                child: Text('Ok'),
+                                onPressed: () {
+                                  postComment(); //
+                                  Navigator.of(context)
+                                      .pop();
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                      //end comment
+                    },
+                  ),
+                  FlatButton(
+                    child: Text('Add Photo'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _pickImageFromGallery();
+                      userData[index]["receipts"] = _image;
+
+                    },
+                  ),
+                  FlatButton(
+                    child: Text('Take Photo'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _pickImageFromCamera();
+                      userData[index]["receipts"] = _cameraImage;
+                    },
+                  ),
+                ],
+              );
+            },
+          ); //
+        },
+      ),
+    );
+
+
   }
 }
 
